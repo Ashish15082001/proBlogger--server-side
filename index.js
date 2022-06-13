@@ -7,6 +7,7 @@ const app = express();
 const port = 3001;
 const bodyParser = require("body-parser");
 const { signup } = require("./controllers/blogs entities/auth/signup");
+const { login } = require("./controllers/blogs entities/auth/login");
 const jsonParser = bodyParser.json();
 
 app.use((req, res, next) => {
@@ -21,6 +22,7 @@ app.get("/trending", fetchBlogs);
 app.get("/blogs", fetchBlogs);
 
 app.post("/signUp", signup);
+app.post("/logIn", login);
 
 const establishDatabaseAndServerConnection = async function () {
   try {

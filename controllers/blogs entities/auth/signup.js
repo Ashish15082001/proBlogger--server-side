@@ -6,10 +6,16 @@ const signup = async function (request, response, next) {
   try {
     const { firstName, lastName, email, password, confirmedPassword } =
       request.body.user;
-    let responsePayload;
 
-    const blogsCollection = getDatabase().collection("users");
-    const mongoResponse = await blogsCollection.insertOne({
+    const usersCollection = getDatabase().collection("users");
+    const doesUserAlreadyExists = await usersCollection.findOne({ email });
+
+    if (doesUserAlreadyExists) {
+      throw new Error("user already exists.");
+    }
+
+    console.log(doesUserAlreadyExists);
+    const mongoResponse = await usersCollection.insertOne({
       firstName,
       lastName,
       email,
@@ -20,11 +26,11 @@ const signup = async function (request, response, next) {
     if (mongoResponse.acknowledged === false)
       throw new Error("user data insertion failed.");
 
-    responsePayload = {
+    const userAccountPayload = {
       firstName,
       lastName,
       email,
-      blogs: { myBlogs: {}, trendingBlogs: {}, favouriteBlogs: {} },
+      _id: mongoResponse.insertedId,
     };
 
     const token = jwt.sign(
@@ -38,10 +44,10 @@ const signup = async function (request, response, next) {
     response.json({
       isError: false,
       token,
-      payload: responsePayload,
+      payload: userAccountPayload,
     });
-  } catch (err) {
-    response.json();
+  } catch (error) {
+    response.json({ isError: true, description: error.message });
   }
 };
 
