@@ -2,6 +2,11 @@ const jwt = require("jsonwebtoken");
 
 const { getDatabase } = require("../../../database/mogoDb");
 
+// - check is email/user already exists in the database
+// - if no user with that email exists then store new user data in the database
+//  check if data was successfully stored in database
+// - send jwt token with payload
+
 const signup = async function (request, response, next) {
   try {
     const { firstName, lastName, email, password, confirmedPassword } =
@@ -14,7 +19,6 @@ const signup = async function (request, response, next) {
       throw new Error("user already exists.");
     }
 
-    console.log(doesUserAlreadyExists);
     const mongoResponse = await usersCollection.insertOne({
       firstName,
       lastName,
@@ -42,12 +46,11 @@ const signup = async function (request, response, next) {
     );
 
     response.json({
-      isError: false,
       token,
       payload: userAccountPayload,
     });
   } catch (error) {
-    response.json({ isError: true, description: error.message });
+    response.status(400).json({ message: error.message });
   }
 };
 

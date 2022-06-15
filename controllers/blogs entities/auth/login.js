@@ -2,6 +2,10 @@ const jwt = require("jsonwebtoken");
 
 const { getDatabase } = require("../../../database/mogoDb");
 
+// - check if email/user exists in data base
+// - if email/user exists then check if password stored in the database matches with the password entered by user
+// - send jwt token with payload
+
 const login = async function (request, response, next) {
   try {
     const { email, password } = request.body.user;
@@ -9,7 +13,7 @@ const login = async function (request, response, next) {
     const usersCollection = getDatabase().collection("users");
     const userData = await usersCollection.findOne({ email });
 
-    if (!userData) throw new Error("user does not exists.");
+    if (!userData) throw new Error("email does not exists.");
     if (userData.password !== password) throw new Error("Invalid password.");
 
     const token = jwt.sign(
@@ -21,12 +25,11 @@ const login = async function (request, response, next) {
     );
 
     response.json({
-      isError: false,
       token,
-      payload: { ...userData, password: undefined },
+      payload: { ...userData, password: undefined, blogs: undefined },
     });
   } catch (error) {
-    response.json({ isError: true, description: error.message });
+    response.status(400).json({ message: error.message });
   }
 };
 

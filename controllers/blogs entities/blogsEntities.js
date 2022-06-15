@@ -5,6 +5,10 @@ const pageSizeLimit = 10;
 const fetchBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
+
+    if (!pageNumber)
+      throw new Error("Please add page number as a search params.");
+
     const pageNumberInt = +pageNumber;
 
     const blogsCollection = getDatabase().collection("blogs");
@@ -22,14 +26,9 @@ const fetchBlogs = async function (request, response, next) {
       blogs.entities[id] = blogsArray[i];
     }
 
-    const responseData = { isError: false, payload };
-    response.json(JSON.stringify(responseData));
-  } catch (err) {
-    console.log(err);
-    const payload = err;
-    const responseData = { isError: true, payload };
-
-    response.json(JSON.stringify(responseData));
+    response.json(payload);
+  } catch (error) {
+    response.status(400).json({ message: error.message });
   }
 };
 

@@ -8,11 +8,13 @@ const port = 3001;
 const bodyParser = require("body-parser");
 const { signup } = require("./controllers/blogs entities/auth/signup");
 const { login } = require("./controllers/blogs entities/auth/login");
+const { verifyAuthentication } = require("./middlewares/verifyAuthentication");
+const { fetchUserData } = require("./controllers/blogs entities/fetchUserData");
 const jsonParser = bodyParser.json();
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 app.use(jsonParser);
@@ -23,6 +25,8 @@ app.get("/blogs", fetchBlogs);
 
 app.post("/signUp", signup);
 app.post("/logIn", login);
+app.post("/logIn", login);
+app.get("/userData", verifyAuthentication, fetchUserData);
 
 const establishDatabaseAndServerConnection = async function () {
   try {
