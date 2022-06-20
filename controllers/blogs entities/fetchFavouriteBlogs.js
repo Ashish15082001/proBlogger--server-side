@@ -2,9 +2,11 @@ const { getDatabase } = require("../../database/mogoDb");
 
 const pageSizeLimit = 10;
 
-const fetchBlogs = async function (request, response, next) {
+const fetchFavouriteBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
+
+    // console.log(pageNumber)
 
     if (!pageNumber)
       throw new Error("Please add page number as a search params.");
@@ -32,4 +34,4 @@ const fetchBlogs = async function (request, response, next) {
   }
 };
 
-module.exports = { fetchBlogs };
+module.exports = { fetchFavouriteBlogs };

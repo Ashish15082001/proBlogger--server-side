@@ -1,32 +1,42 @@
 const express = require("express");
-const { json } = require("express/lib/response");
 const { fetchBlogs } = require("./controllers/blogs entities/blogsEntities");
 const { client, setDatabase } = require("./database/mogoDb");
-const { trendingBlogsEntities, blogsEntities } = require("./dummyData");
 const app = express();
 const port = 3001;
-const bodyParser = require("body-parser");
-const { signup } = require("./controllers/blogs entities/auth/signup");
-const { login } = require("./controllers/blogs entities/auth/login");
+const { signup } = require("./controllers/auth/signup");
+const { login } = require("./controllers/auth/login");
 const { verifyAuthentication } = require("./middlewares/verifyAuthentication");
 const { fetchUserData } = require("./controllers/blogs entities/fetchUserData");
-const jsonParser = bodyParser.json();
+const {
+  fetchFavouriteBlogs,
+} = require("./controllers/blogs entities/fetchFavouriteBlogs");
+const { fileFilter, storage } = require("./utilities/multerConfigure");
+const multer = require("multer");
+const { response } = require("express");
+
+const parser = multer({ storage, fileFilter });
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-app.use(jsonParser);
 
 app.get("/trending", fetchBlogs);
-
 app.get("/blogs", fetchBlogs);
 
-app.post("/signUp", signup);
+app.post("/signUp", parser.any(), signup);
 app.post("/logIn", login);
 app.post("/logIn", login);
 app.get("/userData", verifyAuthentication, fetchUserData);
+app.get("/user/:userId/favourites", verifyAuthentication, fetchFavouriteBlogs);
+app.get("/uploads/images/:imageName", (request, response, next) => {
+  const { imageName } = request.params;
+
+  response.sendFile(
+    `E:/Github Respository/proBlogger--server-side/uploads/images/${imageName}`
+  );
+});
 
 const establishDatabaseAndServerConnection = async function () {
   try {

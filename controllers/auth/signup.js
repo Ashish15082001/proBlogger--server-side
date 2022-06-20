@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { getDatabase } = require("../../../database/mogoDb");
+const { getDatabase } = require("../../database/mogoDb");
 
 // - check is email/user already exists in the database
 // - if no user with that email exists then store new user data in the database
@@ -10,7 +10,11 @@ const { getDatabase } = require("../../../database/mogoDb");
 const signup = async function (request, response, next) {
   try {
     const { firstName, lastName, email, password, confirmedPassword } =
-      request.body.user;
+      request.body;
+
+    const profileImage = request.files[0];
+
+    if (!profileImage) throw new Error("Please select valid image format.");
 
     const usersCollection = getDatabase().collection("users");
     const doesUserAlreadyExists = await usersCollection.findOne({ email });
@@ -24,7 +28,15 @@ const signup = async function (request, response, next) {
       lastName,
       email,
       password,
-      blogs: { myBlogs: {}, trendingBlogs: {}, favouriteBlogs: {} },
+      profileImage,
+      blogs: { myBlogs: {}, favouriteBlogs: {} },
+      about: { followers: {}, followings: {}, publishedBlogs: {} },
+      aboutBlogs: {
+        totalViews: {},
+        totalComments: {},
+        totalLikes: {},
+        trending: {},
+      },
     });
 
     if (mongoResponse.acknowledged === false)
@@ -34,7 +46,15 @@ const signup = async function (request, response, next) {
       firstName,
       lastName,
       email,
+      profileImage,
       _id: mongoResponse.insertedId,
+      about: { followers: {}, followings: {}, publishedBlogs: {} },
+      aboutBlogs: {
+        totalViews: {},
+        totalComments: {},
+        totalLikes: {},
+        trending: {},
+      },
     };
 
     const token = jwt.sign(

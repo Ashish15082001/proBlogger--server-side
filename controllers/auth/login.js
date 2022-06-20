@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { getDatabase } = require("../../../database/mogoDb");
+const { getDatabase } = require("../../database/mogoDb");
 
 // - check if email/user exists in data base
 // - if email/user exists then check if password stored in the database matches with the password entered by user
