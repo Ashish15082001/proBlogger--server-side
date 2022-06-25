@@ -4,7 +4,6 @@ const { fetchMyBlogs } = require("./controllers/blogs entities/fetchMyBlogs");
 const { client, setDatabase } = require("./database/mogoDb");
 const app = express();
 const cors = require("cors");
-const port = 3001;
 const { signup } = require("./controllers/auth/signup");
 const { login } = require("./controllers/auth/login");
 const { verifyAuthentication } = require("./middlewares/verifyAuthentication");
@@ -74,6 +73,8 @@ app.post(
   verifyAuthentication,
   publishBlog
 );
+
+const port = process.env.PORT || 80;
 
 const establishDatabaseAndServerConnection = async function () {
   try {
