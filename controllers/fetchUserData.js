@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { getDatabase } = require("../../database/mogoDb");
+const { getDatabase } = require("../database/mogoDb");
 
 // - extract id(user id) from url search/query params
 // - check if id exists
@@ -20,7 +20,7 @@ const fetchUserData = async function (request, response, next) {
     if (!userData) throw new Error("User does not exists.");
 
     response.json({
-      payload: { ...userData, password: undefined, blogs: undefined },
+      user: { ...userData, password: undefined, blogs: undefined },
     });
   } catch (error) {
     response.status(400).json({ message: error.message });

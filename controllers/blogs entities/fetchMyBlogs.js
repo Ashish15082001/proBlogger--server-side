@@ -1,9 +1,11 @@
 const { PAGE_SIZE_LIMIT } = require("../../constants");
 const { getDatabase } = require("../../database/mogoDb");
+const { ObjectId } = require("mongodb");
 
-const fetchBlogs = async function (request, response, next) {
+const fetchMyBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
+    const { userId } = request.params;
 
     if (!pageNumber)
       throw new Error("Please add page number as a search params.");
@@ -13,33 +15,39 @@ const fetchBlogs = async function (request, response, next) {
     const blogsCollection = getDatabase().collection("blogs");
     const usersCollection = getDatabase().collection("users");
 
-    const blogsArray = await blogsCollection
-      .find()
+    const usersResponse = await usersCollection.findOne({
+      _id: ObjectId(userId),
+    });
+
+    const myBlogsIdArray = Object.values(usersResponse.aboutBlogs.publishes);
+    // console.log(myBlogsIdArray);
+
+    const myBlogsArray = await blogsCollection
+      .find({ _id: { $in: myBlogsIdArray } })
       .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
       .limit(PAGE_SIZE_LIMIT)
       .toArray();
-    const totalDocuments = await blogsCollection.countDocuments();
+
+    // console.log(myBlogsArray);
+
+    const totalDocuments = myBlogsIdArray.length;
     const entities = {};
     const payload = { entities, totalDocuments };
 
-    for (let i = 0; i < blogsArray.length; i++) {
-      const id = blogsArray[i]._id.toString();
-      entities[id] = blogsArray[i];
+    for (let i = 0; i < myBlogsArray.length; i++) {
+      const id = myBlogsArray[i]._id.toString();
+      entities[id] = myBlogsArray[i];
     }
 
     for (const entity of Object.values(payload.entities)) {
-      // console.log(entity);
-      const publisherId = entity.publisherId;
-      const userData = await usersCollection.findOne({ _id: publisherId });
+      const userData = usersResponse;
       entity.publisherName = userData.firstName + " " + userData.lastName;
-      entity.publisherProfileImage = userData.profileImage;
     }
 
-    // console.log(payload);
     response.json(payload);
   } catch (error) {
     response.status(400).json({ message: error.message });
   }
 };
 
-module.exports = { fetchBlogs };
+module.exports = { fetchMyBlogs };

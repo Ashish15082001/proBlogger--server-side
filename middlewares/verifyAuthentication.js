@@ -5,7 +5,7 @@ const verifyAuthentication = function (request, response, next) {
     const token = request.get("Authorization").split(" ")[1];
     const decodedToken = jwt.verify(token, "ashishsinghsecret");
 
-    console.log(decodedToken);
+    // console.log(decodedToken);
     request.jwt = decodedToken;
 
     next();

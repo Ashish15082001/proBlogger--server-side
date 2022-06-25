@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { Db } = require("mongodb");
 
 const { getDatabase } = require("../../database/mogoDb");
 
@@ -8,7 +9,7 @@ const { getDatabase } = require("../../database/mogoDb");
 
 const login = async function (request, response, next) {
   try {
-    const { email, password } = request.body.user;
+    const { email, password } = request.body;
 
     const usersCollection = getDatabase().collection("users");
     const userData = await usersCollection.findOne({ email });
@@ -26,7 +27,7 @@ const login = async function (request, response, next) {
 
     response.json({
       token,
-      payload: { ...userData, password: undefined, blogs: undefined },
+      user: { ...userData, password: undefined, blogs: undefined },
     });
   } catch (error) {
     response.status(400).json({ message: error.message });

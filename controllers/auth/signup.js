@@ -29,13 +29,14 @@ const signup = async function (request, response, next) {
       email,
       password,
       profileImage,
-      blogs: { myBlogs: {}, favouriteBlogs: {} },
-      about: { followers: {}, followings: {}, publishedBlogs: {} },
+      aboutUser: { followers: {}, followings: {} },
       aboutBlogs: {
         totalViews: {},
         totalComments: {},
         totalLikes: {},
-        trending: {},
+        trendings: {},
+        publishes: {},
+        favourites: {},
       },
     });
 
@@ -48,12 +49,14 @@ const signup = async function (request, response, next) {
       email,
       profileImage,
       _id: mongoResponse.insertedId,
-      about: { followers: {}, followings: {}, publishedBlogs: {} },
+      aboutUser: { followers: {}, followings: {} },
       aboutBlogs: {
         totalViews: {},
         totalComments: {},
         totalLikes: {},
-        trending: {},
+        trendings: {},
+        publishes: {},
+        favourites: {},
       },
     };
 
@@ -67,7 +70,7 @@ const signup = async function (request, response, next) {
 
     response.json({
       token,
-      payload: userAccountPayload,
+      user: userAccountPayload,
     });
   } catch (error) {
     response.status(400).json({ message: error.message });

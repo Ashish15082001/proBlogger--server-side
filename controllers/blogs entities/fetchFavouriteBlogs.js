@@ -1,11 +1,11 @@
+const { PAGE_SIZE_LIMIT } = require("../../constants");
 const { getDatabase } = require("../../database/mogoDb");
-
-const pageSizeLimit = 10;
+const { ObjectId } = require("mongodb");
 
 const fetchFavouriteBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
-
+    const { userId } = request.params;
     // console.log(pageNumber)
 
     if (!pageNumber)
@@ -14,20 +14,36 @@ const fetchFavouriteBlogs = async function (request, response, next) {
     const pageNumberInt = +pageNumber;
 
     const blogsCollection = getDatabase().collection("blogs");
-    const blogsArray = await blogsCollection
-      .find()
-      .skip(pageSizeLimit * (pageNumberInt - 1))
-      .limit(pageSizeLimit)
+    const usersCollection = getDatabase().collection("users");
+    const usersResponse = await usersCollection.findOne({
+      _id: ObjectId(userId),
+    });
+
+    const favouriteBlogsIdArray = Object.values(
+      usersResponse.aboutBlogs.favourites
+    );
+
+    const favouriteBlogsArray = await blogsCollection
+      .find({ _id: { $in: favouriteBlogsIdArray } })
+      .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
+      .limit(PAGE_SIZE_LIMIT)
       .toArray();
-    const totalDocuments = await blogsCollection.countDocuments();
+
+    const totalDocuments = favouriteBlogsIdArray.length;
     const entities = {};
     const payload = { entities, totalDocuments };
 
-    for (let i = 0; i < blogsArray.length; i++) {
-      const id = blogsArray[i]._id.toString();
-      entities[id] = blogsArray[i];
+    for (let i = 0; i < favouriteBlogsArray.length; i++) {
+      const id = favouriteBlogsArray[i]._id.toString();
+      entities[id] = favouriteBlogsArray[i];
     }
-    // console.log(payload);
+
+    for (const entity of Object.values(payload.entities)) {
+      const userData = usersResponse;
+      entity.publisherName = userData.firstName + " " + userData.lastName;
+      entity.publisherProfileImage = userData.profileImage;
+    }
+
     response.json(payload);
   } catch (error) {
     response.status(400).json({ message: error.message });

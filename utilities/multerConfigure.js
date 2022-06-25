@@ -5,7 +5,6 @@ const fileFilter = function (req, file, cb) {
     case "image/png":
     case "image/jpg":
     case "image/jpeg":
-      console.log("wow");
       cb(null, true);
       break;
     default:
