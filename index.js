@@ -30,7 +30,7 @@ const {
 const parser = multer({ storage, fileFilter });
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "*D",
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   allowedHeaders: ["Content-Type", "Authorization"],
 };
