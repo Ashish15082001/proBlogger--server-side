@@ -4,8 +4,7 @@ const { getDatabase } = require("../../database/mogoDb");
 
 // - check is email/user already exists in the database
 // - if no user with that email exists then store new user data in the database
-//  check if data was successfully stored in database
-// - send jwt token with payload
+// - when no error, send jwt token with payload
 
 const signup = async function (request, response, next) {
   try {
@@ -31,17 +30,10 @@ const signup = async function (request, response, next) {
       profileImage,
       aboutUser: { followers: {}, followings: {} },
       aboutBlogs: {
-        totalViews: {},
-        totalComments: {},
-        totalLikes: {},
-        trendings: {},
         publishes: {},
         favourites: {},
       },
     });
-
-    if (mongoResponse.acknowledged === false)
-      throw new Error("user data insertion failed.");
 
     const userAccountPayload = {
       firstName,

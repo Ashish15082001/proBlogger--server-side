@@ -1,6 +1,9 @@
-const { PAGE_SIZE_LIMIT } = require("../../constants");
-const { getDatabase } = require("../../database/mogoDb");
+const { ObjectId } = require("mongodb");
+const { PAGE_SIZE_LIMIT } = require("../constants");
+const { getDatabase } = require("../database/mogoDb");
 
+// fetch blogs fom database and add few extra properties to each blog before sending response back to user.
+// add publisher name and publisher profile image properies.
 const fetchBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
@@ -18,6 +21,7 @@ const fetchBlogs = async function (request, response, next) {
       .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
       .limit(PAGE_SIZE_LIMIT)
       .toArray();
+
     const totalDocuments = await blogsCollection.countDocuments();
     const entities = {};
     const payload = { entities, totalDocuments };
@@ -27,15 +31,28 @@ const fetchBlogs = async function (request, response, next) {
       entities[id] = blogsArray[i];
     }
 
+    console.log("hlo");
     for (const entity of Object.values(payload.entities)) {
-      // console.log(entity);
       const publisherId = entity.publisherId;
       const userData = await usersCollection.findOne({ _id: publisherId });
       entity.publisherName = userData.firstName + " " + userData.lastName;
       entity.publisherProfileImage = userData.profileImage;
+
+      for (const commenterUserId of Object.keys(entity.comments)) {
+        const commenter = await usersCollection.findOne({
+          _id: ObjectId(commenterUserId),
+        });
+        const commenterName = commenter.firstName + " " + commenter.lastName;
+        const commenterProfileImage = commenter.profileImage;
+
+        entity.comments[commenterUserId].commenterName = commenterName;
+        entity.comments[commenterUserId].commenterProfileImage =
+          commenterProfileImage;
+      }
     }
 
-    // console.log(payload);
+    console.log(payload);
+
     response.json(payload);
   } catch (error) {
     response.status(400).json({ message: error.message });

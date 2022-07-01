@@ -6,12 +6,8 @@ const publishBlog = async function (request, response, next) {
     const { userId } = request.params;
     const blogData = request.body;
     const blogProfileImage = request.files[0];
-
-    //   console.log(blogData);
-
     const blogsCollection = getDatabase().collection("blogs");
     const usersCollection = getDatabase().collection("users");
-
     const blogInsertionResponse = await blogsCollection.insertOne({
       ...blogData,
       publisherId: ObjectId(userId),
@@ -21,13 +17,8 @@ const publishBlog = async function (request, response, next) {
       comments: {},
       likes: {},
     });
-
-    // if (blogInsertionResponse.acknowledged === false)
-    //   throw new Error("blog publishment failed.");
-
     const insertedBlogId = blogInsertionResponse.insertedId;
-
-    const userUpdationResponse = await usersCollection.updateOne(
+    await usersCollection.updateOne(
       { _id: ObjectId(userId) },
       {
         $set: {
@@ -35,11 +26,6 @@ const publishBlog = async function (request, response, next) {
         },
       }
     );
-
-    // console.log(blogInsertionResponse);
-    // console.log(userUpdationResponse);
-    // if (userUpdationResponse.acknowledged === false)
-    //   throw new Error("user updation failed insertion failed.");
 
     response.json({ insertedBlogId });
   } catch (error) {

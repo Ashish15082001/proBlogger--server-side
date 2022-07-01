@@ -1,47 +1,39 @@
-const { PAGE_SIZE_LIMIT } = require("../../constants");
-const { getDatabase } = require("../../database/mogoDb");
+const { PAGE_SIZE_LIMIT } = require("../constants");
+const { getDatabase } = require("../database/mogoDb");
 const { ObjectId } = require("mongodb");
 
-const fetchFavouriteBlogs = async function (request, response, next) {
+const fetchMyBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
     const { userId } = request.params;
-    // console.log(pageNumber)
 
     if (!pageNumber)
       throw new Error("Please add page number as a search params.");
 
     const pageNumberInt = +pageNumber;
-
     const blogsCollection = getDatabase().collection("blogs");
     const usersCollection = getDatabase().collection("users");
     const usersResponse = await usersCollection.findOne({
       _id: ObjectId(userId),
     });
-
-    const favouriteBlogsIdArray = Object.values(
-      usersResponse.aboutBlogs.favourites
-    );
-
-    const favouriteBlogsArray = await blogsCollection
-      .find({ _id: { $in: favouriteBlogsIdArray } })
+    const myBlogsIdArray = Object.values(usersResponse.aboutBlogs.publishes);
+    const myBlogsArray = await blogsCollection
+      .find({ _id: { $in: myBlogsIdArray } })
       .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
       .limit(PAGE_SIZE_LIMIT)
       .toArray();
-
-    const totalDocuments = favouriteBlogsIdArray.length;
+    const totalDocuments = myBlogsIdArray.length;
     const entities = {};
     const payload = { entities, totalDocuments };
 
-    for (let i = 0; i < favouriteBlogsArray.length; i++) {
-      const id = favouriteBlogsArray[i]._id.toString();
-      entities[id] = favouriteBlogsArray[i];
+    for (let i = 0; i < myBlogsArray.length; i++) {
+      const id = myBlogsArray[i]._id.toString();
+      entities[id] = myBlogsArray[i];
     }
 
     for (const entity of Object.values(payload.entities)) {
       const userData = usersResponse;
       entity.publisherName = userData.firstName + " " + userData.lastName;
-      entity.publisherProfileImage = userData.profileImage;
     }
 
     response.json(payload);
@@ -50,4 +42,4 @@ const fetchFavouriteBlogs = async function (request, response, next) {
   }
 };
 
-module.exports = { fetchFavouriteBlogs };
+module.exports = { fetchMyBlogs };

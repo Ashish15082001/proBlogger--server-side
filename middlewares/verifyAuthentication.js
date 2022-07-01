@@ -10,7 +10,9 @@ const verifyAuthentication = function (request, response, next) {
 
     next();
   } catch (error) {
-    response.status(401).json({ message: error.message });
+    response
+      .status(401)
+      .json({ message: error.message + ". " + "please try logging in again" });
   }
 };
 
