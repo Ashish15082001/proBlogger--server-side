@@ -62,11 +62,10 @@ app.get(
     fetchFavouriteBlogs(request, response, next);
   }
 );
+
 app.get(GET_URL_IMAGE, (request, response, next) => {
   const { imageName } = request.params;
-  response.sendFile(
-    `E:/Github Respository/proBlogger--server-side/uploads/images/${imageName}`
-  );
+  response.sendFile(`${__dirname}/uploads/images/${imageName}`);
 });
 
 app.post(POST_URL_SIGNUP, parser.any(), signup);
