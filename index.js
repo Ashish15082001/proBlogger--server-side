@@ -28,6 +28,7 @@ const {
   POST_URL_ADD_BLOG_TO_FAVOURITES,
   POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
   GET_URL_USER_FAVOURITES_BLOGS,
+  POST_URL_UNLIKE_BLOG,
 } = require("./constants");
 const { likeBlog } = require("./controllers/likeBlog");
 const { viewBlog } = require("./controllers/viewBlog");
@@ -36,6 +37,7 @@ const {
   removeBlogFromFavourites,
 } = require("./controllers/removeBlogFromFavourites");
 const { addBlogToFavourites } = require("./controllers/addBlogToFavourites");
+const { unLikeBlog } = require("./controllers/unLikeBlog");
 
 const parser = multer({ storage, fileFilter });
 
@@ -73,6 +75,12 @@ app.post(
 );
 
 app.post(POST_URL_LIKE_BLOG, bodyParser.json(), verifyAuthentication, likeBlog);
+app.post(
+  POST_URL_UNLIKE_BLOG,
+  bodyParser.json(),
+  verifyAuthentication,
+  unLikeBlog
+);
 app.post(POST_URL_VIEW_BLOG, bodyParser.json(), verifyAuthentication, viewBlog);
 app.post(
   POST_URL_PUBLISH_COMMENT,

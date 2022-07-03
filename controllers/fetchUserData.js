@@ -15,19 +15,14 @@ const fetchUserData = async function (request, response, next) {
     const userData = await usersCollection.findOne({ _id: ObjectId(userId) });
 
     if (!userData) throw new Error("User does not exists.");
-    const statistics = {
-      aboutUser: userData.statistics.aboutUser,
-      aboutBlogs: {
-        ...userData.statistics.aboutBlogs,
-      },
-    };
+
     const credentials = {
       ...userData.credentials,
       password: undefined,
       _id: userData._id,
     };
 
-    response.json({ credentials, statistics });
+    response.json({ credentials, statistics: userData.statistics });
   } catch (error) {
     response.status(400).json({ message: error.message });
   }

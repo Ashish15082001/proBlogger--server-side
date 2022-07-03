@@ -11,6 +11,7 @@ const POST_URL_SIGNUP = "/signUp";
 const POST_URL_LOGIN = "/logIn";
 const POST_URL_BLOG_PUBLISH = "/user/:userId/publishBlog";
 const POST_URL_LIKE_BLOG = "/likeBlog";
+const POST_URL_UNLIKE_BLOG = "/unLikeBlog";
 const POST_URL_VIEW_BLOG = "/viewBlog";
 const POST_URL_PUBLISH_COMMENT = "/publishComment";
 const POST_URL_ADD_BLOG_TO_FAVOURITES =
@@ -30,6 +31,7 @@ module.exports = {
   POST_URL_LOGIN,
   POST_URL_BLOG_PUBLISH,
   POST_URL_LIKE_BLOG,
+  POST_URL_UNLIKE_BLOG,
   POST_URL_VIEW_BLOG,
   POST_URL_PUBLISH_COMMENT,
   POST_URL_ADD_BLOG_TO_FAVOURITES,

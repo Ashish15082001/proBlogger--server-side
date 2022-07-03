@@ -22,6 +22,18 @@ const signup = async function (request, response, next) {
       throw new Error("user already exists.");
     }
 
+    const statistics = {
+      aboutUser: { followers: {}, followings: {} },
+      aboutBlogs: {
+        favourites: {},
+        publishes: {},
+        totalViews: {},
+        totalComments: {},
+        totalLikes: {},
+        trendings: {},
+      },
+    };
+
     const mongoResponse = await usersCollection.insertOne({
       credentials: {
         firstName,
@@ -30,13 +42,7 @@ const signup = async function (request, response, next) {
         password,
         profileImage,
       },
-      statistics: {
-        aboutUser: { followers: {}, followings: {} },
-        aboutBlogs: {
-          publishes: {},
-          favourites: {},
-        },
-      },
+      statistics,
     });
 
     const credentials = {
@@ -58,6 +64,7 @@ const signup = async function (request, response, next) {
     response.json({
       token,
       credentials,
+      statistics,
     });
   } catch (error) {
     response.status(400).json({ message: error.message });

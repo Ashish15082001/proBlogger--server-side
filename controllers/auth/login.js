@@ -30,13 +30,6 @@ const login = async function (request, response, next) {
       { expiresIn: "1h" }
     );
 
-    const statistics = {
-      aboutUser: userData.statistics.aboutUser,
-      aboutBlogs: {
-        ...userData.statistics.aboutBlogs,
-      },
-    };
-
     response.json({
       token,
       credentials: {
@@ -44,7 +37,7 @@ const login = async function (request, response, next) {
         _id: userData._id,
         password: undefined,
       },
-      statistics,
+      statistics: userData.statistics,
     });
   } catch (error) {
     response.status(400).json({ message: error.message });
