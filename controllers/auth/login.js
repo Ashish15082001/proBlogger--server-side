@@ -16,7 +16,7 @@ const login = async function (request, response, next) {
       "credentials.email": email,
     });
 
-    if (!userData) throw new Error("email does not exists.");
+    if (!userData) throw new Error("user does not exists.");
 
     const userCredentials = userData.credentials;
     if (userCredentials.password !== password)

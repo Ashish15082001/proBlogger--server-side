@@ -47,26 +47,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.get(GET_URL_TRENDING, (request, response, next) => {
-  console.log("trending...");
-  fetchBlogs(request, response, next);
-});
-app.get(GET_URL_BLOGS, (request, response, next) => {
-  console.log("blogs...");
-  fetchBlogs(request, response, next);
-});
-app.get(GET_URL_MY_BLOGS, verifyAuthentication, (request, response, next) => {
-  console.log("my blogs...");
-  fetchMyBlogs(request, response, next);
-});
+app.get(GET_URL_TRENDING, fetchBlogs);
+app.get(GET_URL_BLOGS, fetchBlogs);
+app.get(GET_URL_MY_BLOGS, verifyAuthentication, fetchMyBlogs);
 app.get(GET_URL_USERDATA, verifyAuthentication, fetchUserData);
 app.get(
   GET_URL_USER_FAVOURITES_BLOGS,
   verifyAuthentication,
-  (request, response, next) => {
-    console.log("favourites...");
-    fetchFavouriteBlogs(request, response, next);
-  }
+  fetchFavouriteBlogs
 );
 
 app.get(GET_URL_IMAGE, (request, response, next) => {
@@ -104,8 +92,8 @@ app.post(
   removeBlogFromFavourites
 );
 
-const port = process.env.PORT || 80;
-// const port = 3001;
+// const port = process.env.PORT || 80;
+const port = 3001;
 
 const establishDatabaseAndServerConnection = async function () {
   try {

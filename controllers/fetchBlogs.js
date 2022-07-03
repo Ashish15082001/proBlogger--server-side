@@ -7,53 +7,54 @@ const { getDatabase } = require("../database/mogoDb");
 const fetchBlogs = async function (request, response, next) {
   try {
     const { pageNumber } = request.query;
-
+    
     if (!pageNumber)
-      throw new Error("Please add page number as a search params.");
-
+    throw new Error("Please add page number as a search params.");
+    
     const pageNumberInt = +pageNumber;
-
+    
     const blogsCollection = getDatabase().collection("blogs");
     const usersCollection = getDatabase().collection("users");
 
     const blogsArray = await blogsCollection
-      .find()
-      .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
-      .limit(PAGE_SIZE_LIMIT)
-      .toArray();
-
+    .find()
+    .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
+    .limit(PAGE_SIZE_LIMIT)
+    .toArray();
+    
     const totalDocuments = await blogsCollection.countDocuments();
     const entities = {};
     const payload = { entities, totalDocuments };
-
+    
     for (let i = 0; i < blogsArray.length; i++) {
       const id = blogsArray[i]._id.toString();
       entities[id] = blogsArray[i];
     }
-
+    
     for (const entity of Object.values(payload.entities)) {
       const publisherId = entity.publisherId;
       const userData = await usersCollection.findOne({ _id: publisherId });
       const userCredentials = userData.credentials;
       entity.publisherName =
-        userCredentials.firstName + " " + userCredentials.lastName;
+      userCredentials.firstName + " " + userCredentials.lastName;
       entity.publisherProfileImage = userCredentials.profileImage;
-
+      
       for (const commenterUserId of Object.keys(entity.comments)) {
         const commenterData = await usersCollection.findOne({
           _id: ObjectId(commenterUserId),
         });
         const commenterCredentials = commenterData.credentials;
         const commenterName =
-          commenterCredentials.firstName + " " + commenterCredentials.lastName;
+        commenterCredentials.firstName + " " + commenterCredentials.lastName;
         const commenterProfileImage = commenterCredentials.profileImage;
-
+        
         entity.comments[commenterUserId].commenterName = commenterName;
         entity.comments[commenterUserId].commenterProfileImage =
-          commenterProfileImage;
+        commenterProfileImage;
       }
     }
-
+    
+    // throw new Error("Please add page number as a search params.");
     response.json(payload);
   } catch (error) {
     response.status(400).json({ message: error.message });
