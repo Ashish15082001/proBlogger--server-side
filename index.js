@@ -19,17 +19,23 @@ const {
   POST_URL_SIGNUP,
   POST_URL_LOGIN,
   GET_URL_USERDATA,
-  GET_URL_USER_FAVOURITES,
   GET_URL_IMAGE,
   POST_URL_BLOG_PUBLISH,
   GET_URL_MY_BLOGS,
   POST_URL_LIKE_BLOG,
   POST_URL_VIEW_BLOG,
-  PSOT_URL_PUBLISH_COMMENT,
+  POST_URL_PUBLISH_COMMENT,
+  POST_URL_ADD_BLOG_TO_FAVOURITES,
+  POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
+  GET_URL_USER_FAVOURITES_BLOGS,
 } = require("./constants");
 const { likeBlog } = require("./controllers/likeBlog");
 const { viewBlog } = require("./controllers/viewBlog");
 const { publishComment } = require("./controllers/publishComment");
+const {
+  removeBlogFromFavourites,
+} = require("./controllers/removeBlogFromFavourites");
+const { addBlogToFavourites } = require("./controllers/addBlogToFavourites");
 
 const parser = multer({ storage, fileFilter });
 
@@ -55,7 +61,7 @@ app.get(GET_URL_MY_BLOGS, verifyAuthentication, (request, response, next) => {
 });
 app.get(GET_URL_USERDATA, verifyAuthentication, fetchUserData);
 app.get(
-  GET_URL_USER_FAVOURITES,
+  GET_URL_USER_FAVOURITES_BLOGS,
   verifyAuthentication,
   (request, response, next) => {
     console.log("favourites...");
@@ -81,10 +87,21 @@ app.post(
 app.post(POST_URL_LIKE_BLOG, bodyParser.json(), verifyAuthentication, likeBlog);
 app.post(POST_URL_VIEW_BLOG, bodyParser.json(), verifyAuthentication, viewBlog);
 app.post(
-  PSOT_URL_PUBLISH_COMMENT,
+  POST_URL_PUBLISH_COMMENT,
   bodyParser.json(),
   verifyAuthentication,
   publishComment
+);
+app.post(
+  POST_URL_ADD_BLOG_TO_FAVOURITES,
+  verifyAuthentication,
+  bodyParser.json(),
+  addBlogToFavourites
+);
+app.post(
+  POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
+  verifyAuthentication,
+  removeBlogFromFavourites
 );
 
 const port = process.env.PORT || 80;

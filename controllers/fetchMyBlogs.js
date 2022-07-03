@@ -13,10 +13,12 @@ const fetchMyBlogs = async function (request, response, next) {
     const pageNumberInt = +pageNumber;
     const blogsCollection = getDatabase().collection("blogs");
     const usersCollection = getDatabase().collection("users");
-    const usersResponse = await usersCollection.findOne({
+    const usersData = await usersCollection.findOne({
       _id: ObjectId(userId),
     });
-    const myBlogsIdArray = Object.values(usersResponse.aboutBlogs.publishes);
+    const myBlogsIdArray = Object.values(
+      usersData.statistics.aboutBlogs.publishes
+    );
     const myBlogsArray = await blogsCollection
       .find({ _id: { $in: myBlogsIdArray } })
       .skip(PAGE_SIZE_LIMIT * (pageNumberInt - 1))
@@ -25,15 +27,33 @@ const fetchMyBlogs = async function (request, response, next) {
     const totalDocuments = myBlogsIdArray.length;
     const entities = {};
     const payload = { entities, totalDocuments };
-
     for (let i = 0; i < myBlogsArray.length; i++) {
       const id = myBlogsArray[i]._id.toString();
       entities[id] = myBlogsArray[i];
     }
 
     for (const entity of Object.values(payload.entities)) {
-      const userData = usersResponse;
-      entity.publisherName = userData.firstName + " " + userData.lastName;
+      const userData = await usersCollection.findOne({
+        _id: entity.publisherId,
+      });
+      const userCredentials = userData.credentials;
+      entity.publisherName =
+        userCredentials.firstName + " " + userCredentials.lastName;
+      entity.publisherProfileImage = userCredentials.profileImage;
+      
+      for (const commenterUserId of Object.keys(entity.comments)) {
+        const commenterData = await usersCollection.findOne({
+          _id: ObjectId(commenterUserId),
+        });
+        const commenterCredentials = commenterData.credentials;
+        const commenterName =
+          commenterCredentials.firstName + " " + commenterCredentials.lastName;
+        const commenterProfileImage = commenterCredentials.profileImage;
+
+        entity.comments[commenterUserId].commenterName = commenterName;
+        entity.comments[commenterUserId].commenterProfileImage =
+          commenterProfileImage;
+      }
     }
 
     response.json(payload);

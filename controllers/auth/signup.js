@@ -23,33 +23,28 @@ const signup = async function (request, response, next) {
     }
 
     const mongoResponse = await usersCollection.insertOne({
-      firstName,
-      lastName,
-      email,
-      password,
-      profileImage,
-      aboutUser: { followers: {}, followings: {} },
-      aboutBlogs: {
-        publishes: {},
-        favourites: {},
+      credentials: {
+        firstName,
+        lastName,
+        email,
+        password,
+        profileImage,
+      },
+      statistics: {
+        aboutUser: { followers: {}, followings: {} },
+        aboutBlogs: {
+          publishes: {},
+          favourites: {},
+        },
       },
     });
 
-    const userAccountPayload = {
+    const credentials = {
+      _id: mongoResponse.insertedId,
       firstName,
       lastName,
       email,
       profileImage,
-      _id: mongoResponse.insertedId,
-      aboutUser: { followers: {}, followings: {} },
-      aboutBlogs: {
-        totalViews: {},
-        totalComments: {},
-        totalLikes: {},
-        trendings: {},
-        publishes: {},
-        favourites: {},
-      },
     };
 
     const token = jwt.sign(
@@ -62,7 +57,7 @@ const signup = async function (request, response, next) {
 
     response.json({
       token,
-      user: userAccountPayload,
+      credentials,
     });
   } catch (error) {
     response.status(400).json({ message: error.message });

@@ -13,6 +13,7 @@ const publishComment = async function (request, response, next) {
         {
           $set: {
             ["comments." + userId]: {
+              userId: ObjectId(userId),
               date,
               comment: blog.comments[userId].comment + " " + comment,
             },

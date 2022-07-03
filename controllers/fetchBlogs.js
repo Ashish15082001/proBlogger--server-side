@@ -31,27 +31,28 @@ const fetchBlogs = async function (request, response, next) {
       entities[id] = blogsArray[i];
     }
 
-    console.log("hlo");
     for (const entity of Object.values(payload.entities)) {
       const publisherId = entity.publisherId;
       const userData = await usersCollection.findOne({ _id: publisherId });
-      entity.publisherName = userData.firstName + " " + userData.lastName;
-      entity.publisherProfileImage = userData.profileImage;
+      const userCredentials = userData.credentials;
+      entity.publisherName =
+        userCredentials.firstName + " " + userCredentials.lastName;
+      entity.publisherProfileImage = userCredentials.profileImage;
 
       for (const commenterUserId of Object.keys(entity.comments)) {
-        const commenter = await usersCollection.findOne({
+        const commenterData = await usersCollection.findOne({
           _id: ObjectId(commenterUserId),
         });
-        const commenterName = commenter.firstName + " " + commenter.lastName;
-        const commenterProfileImage = commenter.profileImage;
+        const commenterCredentials = commenterData.credentials;
+        const commenterName =
+          commenterCredentials.firstName + " " + commenterCredentials.lastName;
+        const commenterProfileImage = commenterCredentials.profileImage;
 
         entity.comments[commenterUserId].commenterName = commenterName;
         entity.comments[commenterUserId].commenterProfileImage =
           commenterProfileImage;
       }
     }
-
-    console.log(payload);
 
     response.json(payload);
   } catch (error) {

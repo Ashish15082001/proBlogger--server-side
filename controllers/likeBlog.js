@@ -17,7 +17,7 @@ const likeBlog = async function (request, response, next) {
     else
       await blogsCollection.updateOne(
         { _id: ObjectId(blogId) },
-        { $set: { ["likes." + userId]: date } }
+        { $set: { ["likes." + userId]: { userId: ObjectId(userId), date } } }
       );
 
     response.json({ blogId });

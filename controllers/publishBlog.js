@@ -22,12 +22,13 @@ const publishBlog = async function (request, response, next) {
       { _id: ObjectId(userId) },
       {
         $set: {
-          ["aboutBlogs.publishes." + insertedBlogId.toString()]: insertedBlogId,
+          ["statistics.aboutBlogs.publishes." + insertedBlogId.toString()]:
+            insertedBlogId,
         },
       }
     );
 
-    response.json({ insertedBlogId });
+    response.json({ blogId: insertedBlogId });
   } catch (error) {
     response.status(400).json({ message: error.message });
   }

@@ -8,7 +8,7 @@ const viewBlog = async function (request, response, next) {
 
     await blogsCollection.updateOne(
       { _id: ObjectId(blogId) },
-      { $set: { ["views." + userId]: date } }
+      { $set: { ["views." + userId]: { userId: ObjectId(userId), date } } }
     );
 
     response.json({ blogId });

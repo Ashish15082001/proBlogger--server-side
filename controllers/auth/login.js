@@ -12,15 +12,15 @@ const login = async function (request, response, next) {
     const { email, password } = request.body;
 
     const usersCollection = getDatabase().collection("users");
-    const userData = await usersCollection.findOne({ email });
+    const userData = await usersCollection.findOne({
+      "credentials.email": email,
+    });
 
     if (!userData) throw new Error("email does not exists.");
-    if (userData.password !== password) throw new Error("Invalid password.");
 
-    const totalViews = {};
-    const totalLikes = {};
-    const totalComments = {};
-    const trendings = {};
+    const userCredentials = userData.credentials;
+    if (userCredentials.password !== password)
+      throw new Error("Invalid password.");
 
     const token = jwt.sign(
       {
@@ -30,20 +30,21 @@ const login = async function (request, response, next) {
       { expiresIn: "1h" }
     );
 
+    const statistics = {
+      aboutUser: userData.statistics.aboutUser,
+      aboutBlogs: {
+        ...userData.statistics.aboutBlogs,
+      },
+    };
+
     response.json({
       token,
-      user: {
-        ...userData,
-        aboutBlogs: {
-          ...userData.aboutBlogs,
-          totalViews,
-          totalLikes,
-          totalComments,
-          trendings,
-        },
+      credentials: {
+        ...userCredentials,
+        _id: userData._id,
         password: undefined,
-        blogs: undefined,
       },
+      statistics,
     });
   } catch (error) {
     response.status(400).json({ message: error.message });
