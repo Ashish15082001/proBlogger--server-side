@@ -32,17 +32,17 @@ async function publishComment(userId, blogId, comment, date) {
     userUpdateWithQuery
   );
 
-  const blogUpdate = blogData.comments[userId]
-    ? {
-        userId: ObjectId(userId),
-        comment: blogData.comments[userId].comment + " " + comment,
-        date,
-      }
-    : { userId: ObjectId(userId), date, comment };
+  const blogUpdate = {
+    userId: ObjectId(userId),
+    comment,
+    date,
+  };
+  const blogDataUpdateSetObject = {
+    ["comments." + userId + ".commenterComments." + new Date(date).getTime()]:
+      blogUpdate,
+  };
   const blogUpdateWithQuery = {
-    $set: {
-      ["comments." + userId]: blogUpdate,
-    },
+    $set: blogDataUpdateSetObject,
   };
   const filterForUpdatingBlogData = { _id: ObjectId(blogId) };
 
