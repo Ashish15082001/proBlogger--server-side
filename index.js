@@ -1,18 +1,3 @@
-const express = require("express");
-const { fetchMyBlogs } = require("./controllers/fetchMyBlogs");
-const { client, setDatabase } = require("./database/mogoDb");
-const app = express();
-const cors = require("cors");
-const { signup } = require("./controllers/auth/signup");
-const { login } = require("./controllers/auth/login");
-const { verifyAuthentication } = require("./middlewares/verifyAuthentication");
-const { fetchUserData } = require("./controllers/fetchUserData");
-const { fetchFavouriteBlogs } = require("./controllers/fetchFavouriteBlogs");
-const { fileFilter, storage } = require("./utilities/multerConfigure");
-const multer = require("multer");
-const { publishBlog } = require("./controllers/publishBlog");
-const { fetchBlogs } = require("./controllers/fetchBlogs");
-const bodyParser = require("body-parser");
 const {
   GET_URL_TRENDING,
   GET_URL_BLOGS,
@@ -30,14 +15,44 @@ const {
   GET_URL_USER_FAVOURITES_BLOGS,
   POST_URL_UNLIKE_BLOG,
 } = require("./constants");
-const { likeBlog } = require("./controllers/likeBlog");
-const { viewBlog } = require("./controllers/viewBlog");
-const { publishComment } = require("./controllers/publishComment");
+const express = require("express");
+const { fetchMyBlogs } = require("./controllers/fetchMyBlogs");
+const { client, setDatabase } = require("./database/mogoDb");
+const app = express();
+const cors = require("cors");
+const { verifyAuthentication } = require("./middlewares/verifyAuthentication");
+const { fetchFavouriteBlogs } = require("./controllers/fetchFavouriteBlogs");
+const { fileFilter, storage } = require("./utilities/multerConfigure");
+const multer = require("multer");
+const { fetchBlogs } = require("./controllers/fetchBlogs");
+const bodyParser = require("body-parser");
 const {
-  removeBlogFromFavourites,
-} = require("./controllers/removeBlogFromFavourites");
-const { addBlogToFavourites } = require("./controllers/addBlogToFavourites");
-const { unLikeBlog } = require("./controllers/unLikeBlog");
+  handleLoginRequest,
+} = require("./controllers/handlers/handleLoginRequest");
+const {
+  handleSignupRequest,
+} = require("./controllers/handlers/handleSignupRequest");
+const {
+  handleViewBlogRequest,
+} = require("./controllers/handlers/handleViewBlogRequest");
+const { handleLikeBlog } = require("./controllers/handlers/handleLikeBlog");
+const { handleUnlikeBlog } = require("./controllers/handlers/handleUnlikeBlog");
+const {
+  handleAddBlogToFavourites,
+} = require("./controllers/handlers/handleAddBlogToFavourites");
+const {
+  handleRemoveBlogFromFavourites,
+} = require("./controllers/handlers/handleRemoveBlogFromFavourites");
+const {
+  handleFetchUserData,
+} = require("./controllers/handlers/handleFetchUserData");
+const {
+  handlePublishComment,
+} = require("./controllers/handlers/handlePublishComment");
+const {
+  handlePublishBlog,
+} = require("./controllers/handlers/handlePublishBlog");
+const { handleFetchBlogs } = require("./controllers/handlers/handleFetchBlogs");
 
 const parser = multer({ storage, fileFilter });
 
@@ -49,10 +64,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.get(GET_URL_TRENDING, fetchBlogs);
-app.get(GET_URL_BLOGS, fetchBlogs);
+app.get(GET_URL_TRENDING, handleFetchBlogs);
+app.get(GET_URL_BLOGS, handleFetchBlogs);
 app.get(GET_URL_MY_BLOGS, verifyAuthentication, fetchMyBlogs);
-app.get(GET_URL_USERDATA, verifyAuthentication, fetchUserData);
+app.get(GET_URL_USERDATA, verifyAuthentication, handleFetchUserData); // TESTING DONE ##################
 app.get(
   GET_URL_USER_FAVOURITES_BLOGS,
   verifyAuthentication,
@@ -64,41 +79,49 @@ app.get(GET_URL_IMAGE, (request, response, next) => {
   response.sendFile(`${__dirname}/uploads/images/${imageName}`);
 });
 
-app.post(POST_URL_SIGNUP, parser.any(), signup);
-app.post(POST_URL_LOGIN, parser.any(), login);
-
+app.post(POST_URL_SIGNUP, parser.any(), handleSignupRequest); // TESTING DONE ##################
+app.post(POST_URL_LOGIN, parser.any(), handleLoginRequest); // TESTING DONE ##################
 app.post(
   POST_URL_BLOG_PUBLISH,
   parser.any(),
   verifyAuthentication,
-  publishBlog
+  handlePublishBlog
 );
-
-app.post(POST_URL_LIKE_BLOG, bodyParser.json(), verifyAuthentication, likeBlog);
+app.post(
+  POST_URL_LIKE_BLOG,
+  bodyParser.json(),
+  verifyAuthentication,
+  handleLikeBlog
+); // TESTING DONE ##################
 app.post(
   POST_URL_UNLIKE_BLOG,
   bodyParser.json(),
   verifyAuthentication,
-  unLikeBlog
-);
-app.post(POST_URL_VIEW_BLOG, bodyParser.json(), verifyAuthentication, viewBlog);
+  handleUnlikeBlog
+); // TESTING DONE ##################
+app.post(
+  POST_URL_VIEW_BLOG,
+  bodyParser.json(),
+  verifyAuthentication,
+  handleViewBlogRequest
+); // TESTING DONE ##################
 app.post(
   POST_URL_PUBLISH_COMMENT,
   bodyParser.json(),
   verifyAuthentication,
-  publishComment
+  handlePublishComment
 );
 app.post(
   POST_URL_ADD_BLOG_TO_FAVOURITES,
   verifyAuthentication,
   bodyParser.json(),
-  addBlogToFavourites
-);
+  handleAddBlogToFavourites
+); // TESTING DONE ##################
 app.post(
   POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
   verifyAuthentication,
-  removeBlogFromFavourites
-);
+  handleRemoveBlogFromFavourites
+); // TESTING DONE ##################
 
 const port = process.env.PORT || 80;
 // const port = 3001;

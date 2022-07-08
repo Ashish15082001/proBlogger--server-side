@@ -1,20 +1,55 @@
 const { ObjectId } = require("mongodb");
-const { getDatabase } = require("../database/mogoDb");
+const {
+  USERS_COLLECTION_NAME,
+  BLOGS_COLLECTION_NAME,
+} = require("../constants");
+const {
+  fetchDataFromCollection,
+} = require("./helpers/fetchDataFromCollection");
+const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-const viewBlog = async function (request, response, next) {
-  try {
-    const { userId, blogId, date } = request.body;
-    const blogsCollection = getDatabase().collection("blogs");
+async function viewBlog(userId, blogId, date) {
+  const filterForFetchingBlogData = { _id: ObjectId(blogId) };
+  const blogData = await fetchDataFromCollection(
+    "blogs",
+    filterForFetchingBlogData
+  );
+  const publisherId = blogData.publisherId;
+  const userUpdate = {
+    userId: ObjectId(userId),
+    blogId: ObjectId(blogId),
+  };
+  const filterForUpdatingUserData = { _id: ObjectId(publisherId) };
+  const userUpdateWithQuery = {
+    $set: {
+      ["statistics.aboutBlogs.totalViews." + userId]: userUpdate,
+    },
+  };
 
-    await blogsCollection.updateOne(
-      { _id: ObjectId(blogId) },
-      { $set: { ["views." + userId]: { userId: ObjectId(userId), date } } }
-    );
+  await updateDataInCollection(
+    USERS_COLLECTION_NAME,
+    filterForUpdatingUserData,
+    userUpdateWithQuery
+  );
 
-    response.json({ blogId });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  const blogUpdate = {
+    userId: ObjectId(userId),
+    date,
+  };
+  const filterForUpdatingBlogData = { _id: ObjectId(blogId) };
+  const blogUpdateWithQuery = {
+    $set: {
+      ["views." + userId]: blogUpdate,
+    },
+  };
+
+  await updateDataInCollection(
+    BLOGS_COLLECTION_NAME,
+    filterForUpdatingBlogData,
+    blogUpdateWithQuery
+  );
+
+  return { blogId, userId };
+}
 
 module.exports = { viewBlog };

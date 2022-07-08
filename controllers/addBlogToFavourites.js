@@ -1,28 +1,26 @@
-const { getDatabase } = require("../database/mogoDb");
 const { ObjectId } = require("mongodb");
+const { updateDataInCollection } = require("./helpers/updateDataInCollection");
+const { USERS_COLLECTION_NAME } = require("../constants");
 
-const addBlogToFavourites = async function (request, response, next) {
-  try {
-    const { userId, blogId } = request.params;
-    const { date } = request.body;
-    const usersCollection = getDatabase().collection("users");
+async function addBlogToFavourites(userId, blogId, date) {
+  const userUpdate = {
+    blogId: ObjectId(blogId),
+    date,
+  };
+  const filterForUpdatingUserData = { _id: ObjectId(userId) };
+  const userUpdateWithQuery = {
+    $set: {
+      ["statistics.aboutBlogs.favourites." + blogId]: userUpdate,
+    },
+  };
 
-    await usersCollection.updateOne(
-      { _id: ObjectId(userId) },
-      {
-        $set: {
-          ["statistics.aboutBlogs.favourites." + blogId]: {
-            blogId: ObjectId(blogId),
-            date,
-          },
-        },
-      }
-    );
+  await updateDataInCollection(
+    USERS_COLLECTION_NAME,
+    filterForUpdatingUserData,
+    userUpdateWithQuery
+  );
 
-    response.json({ blogId });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  return { blogId, userId };
+}
 
 module.exports = { addBlogToFavourites };

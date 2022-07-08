@@ -1,31 +1,60 @@
 const { ObjectId } = require("mongodb");
-const { getDatabase } = require("../database/mogoDb");
+const { USERS_COLLECTION_NAME } = require("../constants");
+const {
+  fetchDataFromCollection,
+} = require("./helpers/fetchDataFromCollection");
 
 // - extract id(user id) from url search/query params
 // - check if id exists
 // - if user/id exists in the database send user data
-const fetchUserData = async function (request, response, next) {
-  try {
-    const { userId } = request.params;
+async function fetchUserData(userId) {
+  if (!userId)
+    throw new Error("Please add user id as a params in the current url.");
 
-    if (!userId)
-      throw new Error("Please add user id as a params in the current url.");
+  const filterForFetchingUserData = { _id: ObjectId(userId) };
+  const userData = await fetchDataFromCollection(
+    USERS_COLLECTION_NAME,
+    filterForFetchingUserData
+  );
 
-    const usersCollection = getDatabase().collection("users");
-    const userData = await usersCollection.findOne({ _id: ObjectId(userId) });
+  if (!userData) throw new Error("User does not exists.");
 
-    if (!userData) throw new Error("User does not exists.");
+  const credentials = {
+    ...userData.credentials,
+    password: undefined,
+    _id: userData._id,
+  };
 
-    const credentials = {
-      ...userData.credentials,
-      password: undefined,
-      _id: userData._id,
-    };
-
-    response.json({ credentials, statistics: userData.statistics });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  return { credentials, statistics: userData.statistics };
+}
 
 module.exports = { fetchUserData };
+
+/*
+  on success function should return
+   
+{ 
+  credentials: {
+    _id,
+    email,
+    firstName
+    lastName,
+    profileImage: {}
+  },
+  statistics: {
+    aboutBlogs: {
+      favourites: {...},
+      publishes: {...},
+      totalViews: {...}
+      totalComments: {...},
+      totalLikes: {...},
+      trendings: {...}
+    },
+    aboutUser: {
+      followers: {...},
+      followings: {...}
+    }
+  }  
+}
+
+*/

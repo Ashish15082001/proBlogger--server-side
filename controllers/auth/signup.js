@@ -1,74 +1,121 @@
 const jwt = require("jsonwebtoken");
+const { USERS_COLLECTION_NAME } = require("../../constants");
+const {
+  fetchDataFromCollection,
+} = require("../helpers/fetchDataFromCollection");
+const {
+  insertDataIntoCollection,
+} = require("../helpers/insertDataIntoCollection");
 
-const { getDatabase } = require("../../database/mogoDb");
+/**
+ *
+ * @param {string} firstName - firstName of client
+ * @param {string} lastName - lastName of client
+ * @param {string} email - email of client
+ * @param {string} password - password of client
+ * @param {string} confirmedPassword - confirmedPassword of client
+ * @param {Object} profileImage - profileImage of client
+ * @returns {Promise}  user data as promise
+ */
+async function signup(
+  firstName,
+  lastName,
+  email,
+  password,
+  confirmedPassword,
+  profileImage
+) {
+  const filterForFetchingUserData = {
+    ["credentials.email"]: email,
+  };
 
-// - check is email/user already exists in the database
-// - if no user with that email exists then store new user data in the database
-// - when no error, send jwt token with payload
+  if (!profileImage) throw new Error("Please select valid image format.");
 
-const signup = async function (request, response, next) {
-  try {
-    const { firstName, lastName, email, password, confirmedPassword } =
-      request.body;
+  const doesUserAlreadyExists = await fetchDataFromCollection(
+    USERS_COLLECTION_NAME,
+    filterForFetchingUserData
+  );
 
-    const profileImage = request.files[0];
+  if (doesUserAlreadyExists) {
+    throw new Error("user already exists.");
+  }
 
-    if (!profileImage) throw new Error("Please select valid image format.");
-
-    const usersCollection = getDatabase().collection("users");
-    const doesUserAlreadyExists = await usersCollection.findOne({ email });
-
-    if (doesUserAlreadyExists) {
-      throw new Error("user already exists.");
-    }
-
-    const statistics = {
-      aboutUser: { followers: {}, followings: {} },
-      aboutBlogs: {
-        favourites: {},
-        publishes: {},
-        totalViews: {},
-        totalComments: {},
-        totalLikes: {},
-        trendings: {},
-      },
-    };
-
-    const mongoResponse = await usersCollection.insertOne({
-      credentials: {
-        firstName,
-        lastName,
-        email,
-        password,
-        profileImage,
-      },
-      statistics,
-    });
-
-    const credentials = {
-      _id: mongoResponse.insertedId,
+  const statistics = {
+    aboutUser: { followers: {}, followings: {} },
+    aboutBlogs: {
+      favourites: {},
+      publishes: {},
+      totalViews: {},
+      totalComments: {},
+      totalLikes: {},
+      trendings: {},
+    },
+  };
+  const newUserdata = {
+    credentials: {
       firstName,
       lastName,
       email,
+      password,
       profileImage,
-    };
+    },
+    statistics,
+  };
+  const insertionResponse = await insertDataIntoCollection(
+    USERS_COLLECTION_NAME,
+    newUserdata
+  );
+  const credentials = {
+    _id: insertionResponse.insertedId,
+    firstName,
+    lastName,
+    email,
+    profileImage,
+  };
+  const token = jwt.sign(
+    {
+      userId: insertionResponse.insertedId.toString(),
+    },
+    "ashishsinghsecret",
+    { expiresIn: "1h" }
+  );
+  const payload = {
+    token,
+    credentials,
+    statistics,
+  };
 
-    const token = jwt.sign(
-      {
-        userId: mongoResponse.insertedId.toString(),
-      },
-      "ashishsinghsecret",
-      { expiresIn: "1h" }
-    );
-
-    response.json({
-      token,
-      credentials,
-      statistics,
-    });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  return payload;
+}
 
 module.exports = { signup };
+
+/*
+  on success function should return
+   
+{ 
+  credentials: {
+    _id,
+    email,
+    firstName
+    lastName,
+    profileImage: {}
+  },
+  statistics: {
+    aboutBlogs: {
+      favourites: {...},
+      publishes: {...},
+      totalComments: {...},
+      totalLikes: {...},
+      totalViews: {...}
+      trendings: {...}
+    },
+    aboutUser: {
+      followers: {...},
+      followings: {...}
+    }
+  },
+  token,
+}
+
+*/

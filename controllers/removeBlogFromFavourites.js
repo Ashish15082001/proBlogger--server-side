@@ -1,20 +1,20 @@
-const { getDatabase } = require("../database/mogoDb");
 const { ObjectId } = require("mongodb");
+const { updateDataInCollection } = require("./helpers/updateDataInCollection");
+const { USERS_COLLECTION_NAME } = require("../constants");
 
-const removeBlogFromFavourites = async function (request, response, next) {
-  try {
-    const { userId, blogId } = request.params;
-    const usersCollection = getDatabase().collection("users");
+async function removeBlogFromFavourites(userId, blogId) {
+  const filterForUpdatingUserData = { _id: ObjectId(userId) };
+  const userUpdateWithFilter = {
+    $unset: { ["statistics.aboutBlogs.favourites." + blogId]: 1 },
+  };
 
-    await usersCollection.updateOne(
-      { _id: ObjectId(userId) },
-      { $unset: { ["statistics.aboutBlogs.favourites." + blogId]: 1 } }
-    );
+  await updateDataInCollection(
+    USERS_COLLECTION_NAME,
+    filterForUpdatingUserData,
+    userUpdateWithFilter
+  );
 
-    response.json({ blogId });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  return { blogId, userId };
+}
 
 module.exports = { removeBlogFromFavourites };

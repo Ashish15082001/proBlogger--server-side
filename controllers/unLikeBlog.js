@@ -1,18 +1,43 @@
 const { ObjectId } = require("mongodb");
-const { getDatabase } = require("../database/mogoDb");
+const {
+  USERS_COLLECTION_NAME,
+  BLOGS_COLLECTION_NAME,
+} = require("../constants");
+const {
+  fetchDataFromCollection,
+} = require("./helpers/fetchDataFromCollection");
+const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-const unLikeBlog = async function (request, response, next) {
-  try {
-    const { userId, blogId } = request.body;
-    const blogsCollection = getDatabase().collection("blogs");
-    await blogsCollection.updateOne(
-      { _id: ObjectId(blogId) },
-      { $unset: { ["likes." + userId]: 1 } }
-    );
-    response.json({ blogId });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+async function unLikeBlog(userId, blogId) {
+  const filterForFetchingBlogData = { _id: ObjectId(blogId) };
+  const blogData = await fetchDataFromCollection(
+    BLOGS_COLLECTION_NAME,
+    filterForFetchingBlogData
+  );
+  const publisherId = blogData.publisherId;
+  const filterForUpdatingUserData = { _id: ObjectId(publisherId) };
+  const userUpdateWithQuery = {
+    $unset: {
+      ["statistics.aboutBlogs.totalLikes." + userId]: 1,
+    },
+  };
+
+  await updateDataInCollection(
+    USERS_COLLECTION_NAME,
+    filterForUpdatingUserData,
+    userUpdateWithQuery
+  );
+
+  const filterForUpdatingBlogData = { _id: ObjectId(blogId) };
+  const blogUpdateWithQuery = { $unset: { ["likes." + userId]: 1 } };
+
+  await updateDataInCollection(
+    BLOGS_COLLECTION_NAME,
+    filterForUpdatingBlogData,
+    blogUpdateWithQuery
+  );
+
+  return { blogId, userId };
+}
 
 module.exports = { unLikeBlog };

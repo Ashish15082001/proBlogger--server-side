@@ -2,7 +2,7 @@ const { PAGE_SIZE_LIMIT } = require("../constants");
 const { getDatabase } = require("../database/mogoDb");
 const { ObjectId } = require("mongodb");
 
-const fetchMyBlogs = async function (request, response, next) {
+ async function fetchMyBlogs(request, response, next) {
   try {
     const { pageNumber } = request.query;
     const { userId } = request.params;
@@ -28,20 +28,27 @@ const fetchMyBlogs = async function (request, response, next) {
     const entities = {};
     const payload = { entities, totalDocuments };
     for (let i = 0; i < myBlogsArray.length; i++) {
-      const id = myBlogsArray[i]._id.toString();
-      entities[id] = myBlogsArray[i];
-    }
+      const blogId = myBlogsArray[i]._id.toString();
+      // entity is individual blog document
+      const entity = myBlogsArray[i];
 
-    for (const entity of Object.values(payload.entities)) {
-      const userData = await usersCollection.findOne({
-        _id: entity.publisherId,
-      });
+      // adding publisher full name and profile image
+      // using publisherId as a userId and fething publisher data from database
+      // in order to extract profileImage, firstname and lastName
+      const publisherId = entity.publisherId;
+      const userData = await usersCollection.findOne({ _id: publisherId });
       const userCredentials = userData.credentials;
-      entity.publisherName =
+      const publisherName =
         userCredentials.firstName + " " + userCredentials.lastName;
-      entity.publisherProfileImage = userCredentials.profileImage;
-      
+      const publisherProfileImage = userCredentials.profileImage;
+
+      // adding publisher full and publisher profile image to entity
+      entity.publisherName = publisherName;
+      entity.publisherProfileImage = publisherProfileImage;
+
+      // adding all commenters full name and profile image to comment data
       for (const commenterUserId of Object.keys(entity.comments)) {
+        // using commenterId as userId to fetch commenter data from database
         const commenterData = await usersCollection.findOne({
           _id: ObjectId(commenterUserId),
         });
@@ -50,10 +57,13 @@ const fetchMyBlogs = async function (request, response, next) {
           commenterCredentials.firstName + " " + commenterCredentials.lastName;
         const commenterProfileImage = commenterCredentials.profileImage;
 
+        // adding commenter full and commenter profile image to commentData of entity
         entity.comments[commenterUserId].commenterName = commenterName;
         entity.comments[commenterUserId].commenterProfileImage =
           commenterProfileImage;
       }
+
+      entities[blogId] = entity;
     }
 
     response.json(payload);

@@ -4,7 +4,7 @@ const { ObjectId } = require("mongodb");
 
 // fetch blogs fom database and add few extra properties to each blog before sending response back to user.
 // add publisher name and publisher profile image properies.
-const fetchFavouriteBlogs = async function (request, response, next) {
+ async function fetchFavouriteBlogs(request, response, next) {
   try {
     const { pageNumber } = request.query;
     const { userId } = request.params;
@@ -34,20 +34,27 @@ const fetchFavouriteBlogs = async function (request, response, next) {
     const payload = { entities, totalDocuments };
 
     for (let i = 0; i < favouriteBlogsArray.length; i++) {
-      const id = favouriteBlogsArray[i]._id.toString();
-      entities[id] = favouriteBlogsArray[i];
-    }
+      const blogId = favouriteBlogsArray[i]._id.toString();
+      // entity is individual blog document
+      const entity = favouriteBlogsArray[i];
 
-    for (const entity of Object.values(payload.entities)) {
-      const userData = await usersCollection.findOne({
-        _id: entity.publisherId,
-      });
+      // adding publisher full name and profile image
+      // using publisherId as a userId and fething publisher data from database
+      // in order to extract profileImage, firstname and lastName
+      const publisherId = entity.publisherId;
+      const userData = await usersCollection.findOne({ _id: publisherId });
       const userCredentials = userData.credentials;
-      entity.publisherName =
+      const publisherName =
         userCredentials.firstName + " " + userCredentials.lastName;
-      entity.publisherProfileImage = userCredentials.profileImage;
+      const publisherProfileImage = userCredentials.profileImage;
 
+      // adding publisher full and publisher profile image to entity
+      entity.publisherName = publisherName;
+      entity.publisherProfileImage = publisherProfileImage;
+
+      // adding all commenters full name and profile image to comment data
       for (const commenterUserId of Object.keys(entity.comments)) {
+        // using commenterId as userId to fetch commenter data from database
         const commenterData = await usersCollection.findOne({
           _id: ObjectId(commenterUserId),
         });
@@ -56,13 +63,15 @@ const fetchFavouriteBlogs = async function (request, response, next) {
           commenterCredentials.firstName + " " + commenterCredentials.lastName;
         const commenterProfileImage = commenterCredentials.profileImage;
 
+        // adding commenter full and commenter profile image to commentData of entity
         entity.comments[commenterUserId].commenterName = commenterName;
         entity.comments[commenterUserId].commenterProfileImage =
           commenterProfileImage;
       }
+
+      entities[blogId] = entity;
     }
 
-    console.log(payload);
     response.json(payload);
   } catch (error) {
     response.status(400).json({ message: error.message });

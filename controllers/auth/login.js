@@ -1,47 +1,79 @@
 const jwt = require("jsonwebtoken");
-const { Db } = require("mongodb");
+const { USERS_COLLECTION_NAME } = require("../../constants");
+const {
+  fetchDataFromCollection,
+} = require("../helpers/fetchDataFromCollection");
 
-const { getDatabase } = require("../../database/mogoDb");
+/**
+ *
+ * @param {string} email - email of client
+ * @param {string} password - password of client
+ * @returns {Promise}  user data as promise
+ */
+async function login(email, password) {
+  const filterForFetchingUserData = {
+    "credentials.email": email,
+  };
+  const userData = await fetchDataFromCollection(
+    USERS_COLLECTION_NAME,
+    filterForFetchingUserData
+  );
 
-// - check if email/user exists in data base
-// - if email/user exists then check if password stored in the database matches with the password entered by user
-// - when no error, send jwt token with payload
+  if (!userData) throw new Error("user does not exists.");
 
-const login = async function (request, response, next) {
-  try {
-    const { email, password } = request.body;
+  const userCredentials = userData.credentials;
 
-    const usersCollection = getDatabase().collection("users");
-    const userData = await usersCollection.findOne({
-      "credentials.email": email,
-    });
+  if (userCredentials.password !== password)
+    throw new Error("Invalid password.");
 
-    if (!userData) throw new Error("user does not exists.");
+  const token = jwt.sign(
+    {
+      userId: userData._id.toString(),
+    },
+    "ashishsinghsecret",
+    { expiresIn: "1h" }
+  );
+  const payload = {
+    token,
+    credentials: {
+      ...userCredentials,
+      _id: userData._id,
+      password: undefined,
+    },
+    statistics: userData.statistics,
+  };
 
-    const userCredentials = userData.credentials;
-    if (userCredentials.password !== password)
-      throw new Error("Invalid password.");
-
-    const token = jwt.sign(
-      {
-        userId: userData._id.toString(),
-      },
-      "ashishsinghsecret",
-      { expiresIn: "1h" }
-    );
-
-    response.json({
-      token,
-      credentials: {
-        ...userCredentials,
-        _id: userData._id,
-        password: undefined,
-      },
-      statistics: userData.statistics,
-    });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  return payload;
+}
 
 module.exports = { login };
+
+/*
+  on success function should return
+   
+{ 
+  credentials: {
+    _id,
+    email,
+    firstName
+    lastName,
+    profileImage: {}
+  },
+  statistics: {
+    aboutBlogs: {
+      favourites: {...},
+      publishes: {...},
+      totalComments: {...},
+      totalLikes: {...},
+      totalViews: {...}
+      trendings: {...}
+    },
+    aboutUser: {
+      followers: {...},
+      followings: {...}
+    }
+  },
+  token,
+}
+
+*/

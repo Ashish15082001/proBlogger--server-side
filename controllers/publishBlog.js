@@ -1,37 +1,42 @@
-const { getDatabase } = require("../database/mogoDb");
 const { ObjectId } = require("mongodb");
+const {
+  insertDataIntoCollection,
+} = require("./helpers/insertDataIntoCollection");
+const {
+  BLOGS_COLLECTION_NAME,
+  USERS_COLLECTION_NAME,
+} = require("../constants");
+const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-const publishBlog = async function (request, response, next) {
-  try {
-    const { userId } = request.params;
-    const blogData = request.body;
-    const blogProfileImage = request.files[0];
-    const blogsCollection = getDatabase().collection("blogs");
-    const usersCollection = getDatabase().collection("users");
-    const blogInsertionResponse = await blogsCollection.insertOne({
-      ...blogData,
-      publisherId: ObjectId(userId),
-      timeOfPublish: new Date(),
-      blogProfileImage,
-      views: {},
-      comments: {},
-      likes: {},
-    });
-    const insertedBlogId = blogInsertionResponse.insertedId;
-    await usersCollection.updateOne(
-      { _id: ObjectId(userId) },
-      {
-        $set: {
-          ["statistics.aboutBlogs.publishes." + insertedBlogId.toString()]:
-            insertedBlogId,
-        },
-      }
-    );
+async function publishBlog(userId, blogData, blogProfileImage) {
+  const newBlogData = {
+    ...blogData,
+    publisherId: ObjectId(userId),
+    blogProfileImage,
+    views: {},
+    comments: {},
+    likes: {},
+  };
+  const blogInsertionResponse = await insertDataIntoCollection(
+    BLOGS_COLLECTION_NAME,
+    newBlogData
+  );
+  const insertedBlogId = blogInsertionResponse.insertedId;
+  const filterForUpdatingUserData = { _id: ObjectId(userId) };
+  const userUpdateWithQuery = {
+    $set: {
+      ["statistics.aboutBlogs.publishes." + insertedBlogId.toString()]:
+        insertedBlogId,
+    },
+  };
 
-    response.json({ blogId: insertedBlogId });
-  } catch (error) {
-    response.status(400).json({ message: error.message });
-  }
-};
+  await updateDataInCollection(
+    USERS_COLLECTION_NAME,
+    filterForUpdatingUserData,
+    userUpdateWithQuery
+  );
+
+  return { message: "blog published successfully" };
+}
 
 module.exports = { publishBlog };
