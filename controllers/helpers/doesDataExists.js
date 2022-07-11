@@ -7,7 +7,8 @@ const { fetchDataFromCollection } = require("./fetchDataFromCollection");
  * @returns {Boolean} true if data exists else false
  */
 async function doesDataExists(collectionName, filter) {
-  return (await fetchDataFromCollection(collectionName, filter)) ? true : false;
+  const user = await fetchDataFromCollection(collectionName, filter);
+  return user ? true : false;
 }
 
 module.exports = { doesDataExists };
