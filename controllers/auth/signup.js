@@ -24,7 +24,7 @@ async function signup({
   password,
   confirmedPassword,
   profileImage,
-}) {
+}) {console.log(firstName, lastName, email, password, confirmedPassword);
   const filterForFetchingUserData = {
     ["credentials.email"]: email,
   };
@@ -63,7 +63,7 @@ async function signup({
   };
   const insertionResponse = await insertDataIntoCollection({
     collectionName: USERS_COLLECTION_NAME,
-    filter: newUserdata,
+    data: newUserdata,
   });
   const credentials = {
     _id: insertionResponse.insertedId,

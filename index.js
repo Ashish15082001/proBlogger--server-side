@@ -133,8 +133,8 @@ app.post(
   handleDeleteMyBlogRequest
 );
 
-const port = process.env.PORT || 80;
-// const port = 3001;
+// const port = process.env.PORT || 80;
+const port = 3001;
 
 const establishDatabaseAndServerConnection = async function () {
   try {
