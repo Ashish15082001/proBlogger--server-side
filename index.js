@@ -57,6 +57,7 @@ const { handleFetchBlogs } = require("./controllers/handlers/handleFetchBlogs");
 const {
   handleDeleteMyBlogRequest,
 } = require("./controllers/handlers/handleDeleteMyBlogRequest");
+const path = require("path");
 
 const parser = multer({ storage, fileFilter });
 
@@ -80,7 +81,13 @@ app.get(
 
 app.get(GET_URL_IMAGE, (request, response, next) => {
   const { imageName } = request.params;
-  response.sendFile(`${__dirname}/uploads/images/${imageName}`);
+  const imageAbsolutePath = path.join(
+    __dirname,
+    "uploads",
+    "images",
+    imageName
+  );
+  response.sendFile(imageAbsolutePath);
 });
 
 app.post(POST_URL_SIGNUP, parser.any(), handleSignupRequest); // TESTING DONE ##################

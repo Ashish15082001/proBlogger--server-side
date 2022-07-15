@@ -24,7 +24,7 @@ async function signup({
   password,
   confirmedPassword,
   profileImage,
-}) {console.log(firstName, lastName, email, password, confirmedPassword);
+}) {
   const filterForFetchingUserData = {
     ["credentials.email"]: email,
   };
