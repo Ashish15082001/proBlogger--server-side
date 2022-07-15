@@ -6,9 +6,9 @@ const { getDatabase } = require("../../database/mogoDb");
  * @param {Object} data - data to be inserted into given collection
  * @returns {Promise} represents insertion response
  */
-async function insertDataIntoCollection({ collectionName, data }) {
+async function deleteDataFromCollection({ collectionName, filter }) {
   const collectionReference = getDatabase().collection(collectionName);
-  return await collectionReference.insertOne(data);
+  return await collectionReference.deleteOne(filter);
 }
 
-module.exports = { insertDataIntoCollection };
+module.exports = { deleteDataFromCollection };

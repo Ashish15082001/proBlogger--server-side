@@ -8,12 +8,12 @@ const {
 } = require("./helpers/fetchDataFromCollection");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-async function publishComment(userId, blogId, comment, date) {
+async function publishComment({ userId, blogId, comment, date }) {
   const filterForFetchingBlogData = { _id: ObjectId(blogId) };
-  const blogData = await fetchDataFromCollection(
-    BLOGS_COLLECTION_NAME,
-    filterForFetchingBlogData
-  );
+  const blogData = await fetchDataFromCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForFetchingBlogData,
+  });
   const publisherId = blogData.publisherId;
   const userUpdate = {
     userId: ObjectId(userId),
@@ -26,11 +26,11 @@ async function publishComment(userId, blogId, comment, date) {
   };
   const filterForUpdatingUserData = { _id: ObjectId(publisherId) };
 
-  await updateDataInCollection(
-    USERS_COLLECTION_NAME,
-    filterForUpdatingUserData,
-    userUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForUpdatingUserData,
+    dataWithQuery: userUpdateWithQuery,
+  });
 
   const blogUpdate = {
     userId: ObjectId(userId),
@@ -46,11 +46,11 @@ async function publishComment(userId, blogId, comment, date) {
   };
   const filterForUpdatingBlogData = { _id: ObjectId(blogId) };
 
-  await updateDataInCollection(
-    BLOGS_COLLECTION_NAME,
-    filterForUpdatingBlogData,
-    blogUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForUpdatingBlogData,
+    dataWithQuery: blogUpdateWithQuery,
+  });
 
   return { message: "comment published successfully" };
 }

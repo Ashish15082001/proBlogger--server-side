@@ -8,12 +8,12 @@ const {
 } = require("./helpers/fetchDataFromCollection");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-async function viewBlog(userId, blogId, date) {
+async function viewBlog({ userId, blogId, date }) {
   const filterForFetchingBlogData = { _id: ObjectId(blogId) };
-  const blogData = await fetchDataFromCollection(
-    "blogs",
-    filterForFetchingBlogData
-  );
+  const blogData = await fetchDataFromCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForFetchingBlogData,
+  });
   const publisherId = blogData.publisherId;
   const userUpdate = {
     userId: ObjectId(userId),
@@ -26,11 +26,11 @@ async function viewBlog(userId, blogId, date) {
     },
   };
 
-  await updateDataInCollection(
-    USERS_COLLECTION_NAME,
-    filterForUpdatingUserData,
-    userUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForUpdatingUserData,
+    dataWithQuery: userUpdateWithQuery,
+  });
 
   const blogUpdate = {
     userId: ObjectId(userId),
@@ -43,11 +43,11 @@ async function viewBlog(userId, blogId, date) {
     },
   };
 
-  await updateDataInCollection(
-    BLOGS_COLLECTION_NAME,
-    filterForUpdatingBlogData,
-    blogUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForUpdatingBlogData,
+    dataWithQuery: blogUpdateWithQuery,
+  });
 
   return { blogId, userId };
 }

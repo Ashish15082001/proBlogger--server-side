@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const { PAGE_SIZE_LIMIT } = require("../constants");
 const { getDatabase } = require("../database/mogoDb");
 
-async function fetchBlogs(pageNumber) {
+async function fetchBlogs({ pageNumber }) {
   if (!pageNumber)
     throw new Error("Please add page number as a search params.");
 

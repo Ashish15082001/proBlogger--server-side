@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 const { USERS_COLLECTION_NAME } = require("../constants");
 
-async function addBlogToFavourites(userId, blogId, date) {
+async function addBlogToFavourites({ userId, blogId, date }) {
   const userUpdate = {
     blogId: ObjectId(blogId),
     date,
@@ -14,11 +14,11 @@ async function addBlogToFavourites(userId, blogId, date) {
     },
   };
 
-  await updateDataInCollection(
-    USERS_COLLECTION_NAME,
-    filterForUpdatingUserData,
-    userUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForUpdatingUserData,
+    dataWithQuery: userUpdateWithQuery,
+  });
 
   return { blogId, userId };
 }

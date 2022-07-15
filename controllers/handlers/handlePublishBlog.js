@@ -12,8 +12,7 @@ async function handlePublishBlog(request, response, next) {
     const { userId } = request.params;
     const blogData = request.body;
     const blogProfileImage = request.files[0];
-
-    const payload = await publishBlog(userId, blogData, blogProfileImage);
+    const payload = await publishBlog({ userId, blogData, blogProfileImage });
 
     response.json(payload);
   } catch (error) {

@@ -10,7 +10,7 @@ const { fetchUserData } = require("../fetchUserData");
 async function handleFetchUserData(request, response, next) {
   try {
     const { userId } = request.params;
-    const payload = await fetchUserData(userId);
+    const payload = await fetchUserData({ userId });
 
     response.json(payload);
   } catch (error) {

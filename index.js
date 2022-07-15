@@ -14,6 +14,7 @@ const {
   POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
   GET_URL_USER_FAVOURITES_BLOGS,
   POST_URL_UNLIKE_BLOG,
+  POST_URL_DELETE_MY_BLOG,
 } = require("./constants");
 const express = require("express");
 const { fetchMyBlogs } = require("./controllers/fetchMyBlogs");
@@ -53,6 +54,9 @@ const {
   handlePublishBlog,
 } = require("./controllers/handlers/handlePublishBlog");
 const { handleFetchBlogs } = require("./controllers/handlers/handleFetchBlogs");
+const {
+  handleDeleteMyBlogRequest,
+} = require("./controllers/handlers/handleDeleteMyBlogRequest");
 
 const parser = multer({ storage, fileFilter });
 
@@ -123,8 +127,14 @@ app.post(
   handleRemoveBlogFromFavourites
 ); // TESTING DONE ##################
 
-const port = process.env.PORT || 80;
-// const port = 3001;
+app.post(
+  POST_URL_DELETE_MY_BLOG,
+  verifyAuthentication,
+  handleDeleteMyBlogRequest
+);
+
+// const port = process.env.PORT || 80;
+const port = 3001;
 
 const establishDatabaseAndServerConnection = async function () {
   try {

@@ -10,7 +10,7 @@ const { likeBlog } = require("../likeBlog");
 async function handleLikeBlog(request, response, next) {
   try {
     const { userId, blogId, date } = request.body;
-    const payload = await likeBlog(userId, blogId, date);
+    const payload = await likeBlog({ userId, blogId, date });
 
     response.json(payload);
   } catch (error) {

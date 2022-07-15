@@ -17,24 +17,24 @@ const {
  * @param {Object} profileImage - profileImage of client
  * @returns {Promise}  user data as promise
  */
-async function signup(
+async function signup({
   firstName,
   lastName,
   email,
   password,
   confirmedPassword,
-  profileImage
-) {
+  profileImage,
+}) {
   const filterForFetchingUserData = {
     ["credentials.email"]: email,
   };
 
   if (!profileImage) throw new Error("Please select valid image format.");
 
-  const doesUserAlreadyExists = await fetchDataFromCollection(
-    USERS_COLLECTION_NAME,
-    filterForFetchingUserData
-  );
+  const doesUserAlreadyExists = await fetchDataFromCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForFetchingUserData,
+  });
 
   if (doesUserAlreadyExists) {
     throw new Error("user already exists.");
@@ -61,10 +61,10 @@ async function signup(
     },
     statistics,
   };
-  const insertionResponse = await insertDataIntoCollection(
-    USERS_COLLECTION_NAME,
-    newUserdata
-  );
+  const insertionResponse = await insertDataIntoCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: newUserdata,
+  });
   const credentials = {
     _id: insertionResponse.insertedId,
     firstName,

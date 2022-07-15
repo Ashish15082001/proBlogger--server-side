@@ -12,18 +12,20 @@ async function handleSignupRequest(request, response, next) {
     const { firstName, lastName, email, password, confirmedPassword } =
       request.body;
     const profileImage = request.files[0];
-    const payload = await signup(
+    const payload = await signup({
       firstName,
       lastName,
       email,
       password,
       confirmedPassword,
-      profileImage
-    );
+      profileImage,
+    });
 
     response.json(payload);
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({
+      message: error.message,
+    });
   }
 }
 

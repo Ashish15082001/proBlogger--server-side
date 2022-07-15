@@ -7,15 +7,15 @@ const {
 // - extract id(user id) from url search/query params
 // - check if id exists
 // - if user/id exists in the database send user data
-async function fetchUserData(userId) {
+async function fetchUserData({ userId }) {
   if (!userId)
     throw new Error("Please add user id as a params in the current url.");
 
   const filterForFetchingUserData = { _id: ObjectId(userId) };
-  const userData = await fetchDataFromCollection(
-    USERS_COLLECTION_NAME,
-    filterForFetchingUserData
-  );
+  const userData = await fetchDataFromCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForFetchingUserData,
+  });
 
   if (!userData) throw new Error("User does not exists.");
 

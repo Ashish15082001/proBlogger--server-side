@@ -10,7 +10,7 @@ const { fetchBlogs } = require("../fetchBlogs");
 async function handleFetchBlogs(request, response, next) {
   try {
     const { pageNumber } = request.query;
-    const payload = await fetchBlogs(pageNumber);
+    const payload = await fetchBlogs({ pageNumber });
 
     response.json(payload);
   } catch (error) {

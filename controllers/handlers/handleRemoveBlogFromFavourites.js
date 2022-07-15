@@ -10,7 +10,7 @@ const { removeBlogFromFavourites } = require("../removeBlogFromFavourites");
 async function handleRemoveBlogFromFavourites(request, response, next) {
   try {
     const { userId, blogId } = request.params;
-    const payload = await removeBlogFromFavourites(userId, blogId);
+    const payload = await removeBlogFromFavourites({ userId, blogId });
 
     response.json(payload);
   } catch (error) {

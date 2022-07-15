@@ -8,12 +8,12 @@ const {
 } = require("./helpers/fetchDataFromCollection");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-async function unLikeBlog(userId, blogId) {
+async function unLikeBlog({ userId, blogId }) {
   const filterForFetchingBlogData = { _id: ObjectId(blogId) };
-  const blogData = await fetchDataFromCollection(
-    BLOGS_COLLECTION_NAME,
-    filterForFetchingBlogData
-  );
+  const blogData = await fetchDataFromCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForFetchingBlogData,
+  });
   const publisherId = blogData.publisherId;
   const filterForUpdatingUserData = { _id: ObjectId(publisherId) };
   const userUpdateWithQuery = {
@@ -22,20 +22,20 @@ async function unLikeBlog(userId, blogId) {
     },
   };
 
-  await updateDataInCollection(
-    USERS_COLLECTION_NAME,
-    filterForUpdatingUserData,
-    userUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForUpdatingUserData,
+    dataWithQuery: userUpdateWithQuery,
+  });
 
   const filterForUpdatingBlogData = { _id: ObjectId(blogId) };
   const blogUpdateWithQuery = { $unset: { ["likes." + userId]: 1 } };
 
-  await updateDataInCollection(
-    BLOGS_COLLECTION_NAME,
-    filterForUpdatingBlogData,
-    blogUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    filter: filterForUpdatingBlogData,
+    dataWithQuery: blogUpdateWithQuery,
+  });
 
   return { blogId, userId };
 }

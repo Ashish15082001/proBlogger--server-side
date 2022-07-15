@@ -10,7 +10,7 @@ const { viewBlog } = require("../viewBlog");
 async function handleViewBlogRequest(request, response, next) {
   try {
     const { userId, blogId, date } = request.body;
-    const payload = await viewBlog(userId, blogId, date);
+    const payload = await viewBlog({ userId, blogId, date });
 
     response.json(payload);
   } catch (error) {

@@ -8,7 +8,7 @@ const {
 } = require("../constants");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-async function publishBlog(userId, blogData, blogProfileImage) {
+async function publishBlog({ userId, blogData, blogProfileImage }) {
   const newBlogData = {
     ...blogData,
     publisherId: ObjectId(userId),
@@ -17,10 +17,10 @@ async function publishBlog(userId, blogData, blogProfileImage) {
     comments: {},
     likes: {},
   };
-  const blogInsertionResponse = await insertDataIntoCollection(
-    BLOGS_COLLECTION_NAME,
-    newBlogData
-  );
+  const blogInsertionResponse = await insertDataIntoCollection({
+    collectionName: BLOGS_COLLECTION_NAME,
+    data: newBlogData,
+  });
   const insertedBlogId = blogInsertionResponse.insertedId;
   const filterForUpdatingUserData = { _id: ObjectId(userId) };
   const userUpdateWithQuery = {
@@ -30,11 +30,11 @@ async function publishBlog(userId, blogData, blogProfileImage) {
     },
   };
 
-  await updateDataInCollection(
-    USERS_COLLECTION_NAME,
-    filterForUpdatingUserData,
-    userUpdateWithQuery
-  );
+  await updateDataInCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForUpdatingUserData,
+    dataWithQuery: userUpdateWithQuery,
+  });
 
   return { message: "blog published successfully" };
 }

@@ -10,7 +10,7 @@ const { unLikeBlog } = require("../unLikeBlog");
 async function handleUnlikeBlog(request, response, next) {
   try {
     const { userId, blogId } = request.body;
-    const payload = await unLikeBlog(userId, blogId);
+    const payload = await unLikeBlog({ userId, blogId });
 
     response.json(payload);
   } catch (error) {

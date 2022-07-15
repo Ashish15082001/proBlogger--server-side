@@ -10,7 +10,7 @@ const { login } = require("../auth/login");
 async function handleLoginRequest(request, response, next) {
   try {
     const { email, password } = request.body;
-    const payload = await login(email, password);
+    const payload = await login({ email, password });
 
     response.json(payload);
   } catch (error) {

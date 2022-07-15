@@ -18,6 +18,7 @@ const POST_URL_ADD_BLOG_TO_FAVOURITES =
   "/user/:userId/blog/:blogId/addBlogToFavourites";
 const POST_URL_REMOVE_BLOG_FROM_FAVOURITES =
   "/user/:userId/blog/:blogId/removeBlogFromFavourites";
+const POST_URL_DELETE_MY_BLOG = "/user/:userId/deleteMyBlog/:blogId";
 
 const USERS_COLLECTION_NAME = "users";
 const BLOGS_COLLECTION_NAME = "blogs";
@@ -39,6 +40,7 @@ module.exports = {
   POST_URL_PUBLISH_COMMENT,
   POST_URL_ADD_BLOG_TO_FAVOURITES,
   POST_URL_REMOVE_BLOG_FROM_FAVOURITES,
+  POST_URL_DELETE_MY_BLOG,
   USERS_COLLECTION_NAME,
   BLOGS_COLLECTION_NAME,
 };

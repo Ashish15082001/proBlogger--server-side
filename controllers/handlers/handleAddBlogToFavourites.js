@@ -11,7 +11,7 @@ async function handleAddBlogToFavourites(request, response, next) {
   try {
     const { userId, blogId } = request.params;
     const { date } = request.body;
-    const payload = await addBlogToFavourites(userId, blogId, date);
+    const payload = await addBlogToFavourites({ userId, blogId, date });
 
     response.json(payload);
   } catch (error) {

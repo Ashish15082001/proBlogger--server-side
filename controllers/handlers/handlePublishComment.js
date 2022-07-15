@@ -10,11 +10,13 @@ const { publishComment } = require("../publishComment");
 async function handlePublishComment(request, response, next) {
   try {
     const { userId, blogId, comment, date } = request.body;
-    const payload = await publishComment(userId, blogId, comment, date);
+    const payload = await publishComment({ userId, blogId, comment, date });
 
     response.json(payload);
   } catch (error) {
-    response.status(400).json({ message: error.message });
+    response.status(400).json({
+      message: error.message,
+    });
   }
 }
 

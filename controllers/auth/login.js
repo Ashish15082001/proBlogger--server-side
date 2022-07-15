@@ -10,14 +10,14 @@ const {
  * @param {string} password - password of client
  * @returns {Promise}  user data as promise
  */
-async function login(email, password) {
+async function login({ email, password }) {
   const filterForFetchingUserData = {
     "credentials.email": email,
   };
-  const userData = await fetchDataFromCollection(
-    USERS_COLLECTION_NAME,
-    filterForFetchingUserData
-  );
+  const userData = await fetchDataFromCollection({
+    collectionName: USERS_COLLECTION_NAME,
+    filter: filterForFetchingUserData,
+  });
 
   if (!userData) throw new Error("user does not exists.");
 
