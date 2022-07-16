@@ -21,6 +21,7 @@ async function handleSignupRequest(request, response, next) {
       profileImage,
     });
 
+    console.log(payload);
     response.json(payload);
   } catch (error) {
     response.status(400).json({
