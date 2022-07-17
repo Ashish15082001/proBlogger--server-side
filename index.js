@@ -150,6 +150,10 @@ const establishDatabaseAndServerConnection = async function () {
 
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
+      setTimeout(function jagteRaho() {
+        console.log("jaagte rahoo...");
+        setTimeout(jagteRaho, 1000 * 60);
+      }, 1000 * 60);
     });
   } catch (err) {
     console.log(err);
