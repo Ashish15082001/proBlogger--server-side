@@ -8,11 +8,10 @@ const {
 } = require("../constants");
 const { updateDataInCollection } = require("./helpers/updateDataInCollection");
 
-async function publishBlog({ userId, blogData, blogProfileImage }) {
+async function publishBlog({ userId, blogData }) {
   const newBlogData = {
     ...blogData,
     publisherId: ObjectId(userId),
-    blogProfileImage,
     views: {},
     comments: {},
     likes: {},

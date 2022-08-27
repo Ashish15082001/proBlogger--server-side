@@ -94,7 +94,7 @@ app.post(POST_URL_SIGNUP, parser.any(), handleSignupRequest); // TESTING DONE ##
 app.post(POST_URL_LOGIN, parser.any(), handleLoginRequest); // TESTING DONE ##################
 app.post(
   POST_URL_BLOG_PUBLISH,
-  parser.any(),
+  bodyParser.json(),
   verifyAuthentication,
   handlePublishBlog
 );
@@ -140,8 +140,8 @@ app.post(
   handleDeleteMyBlogRequest
 );
 
-const port = process.env.PORT || 80;
-// const port = 3001;
+// const port = process.env.PORT || 80;
+const port = 3001;
 
 const establishDatabaseAndServerConnection = async function () {
   try {
@@ -150,10 +150,10 @@ const establishDatabaseAndServerConnection = async function () {
 
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
-      setTimeout(function jagteRaho() {
-        console.log("jaagte rahoo...");
-        setTimeout(jagteRaho, 1000 * 60);
-      }, 1000 * 60);
+      // setTimeout(function jagteRaho() {
+      //   console.log("jaagte rahoo...");
+      //   setTimeout(jagteRaho, 1000 * 60);
+      // }, 1000 * 60);
     });
   } catch (err) {
     console.log(err);
